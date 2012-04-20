@@ -1,0 +1,23 @@
+# zk-presence
+
+description "Start the ZK EC2 presence daemon (https://github.com/librato/zk-recipes)"
+author "Librato <mike@librato.com>"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+# Automatically restart process if crashed
+respawn
+
+# Run before process
+script
+    if [ -r /etc/default/zk-presenced ]; then
+        . /etc/default/zk-presenced
+    else
+        exit 1
+    fi
+
+    cd $ZK_PRESENCED_DIR && \
+    exec <%= @bundle_cmd %> exec ./bin/zk-ec2-presenced --namespace "$PRESENCE_NAMESPACE" --hosts "$ZK_HOSTS" --types "$PRESENCE_TYPES" --logfile "$LOGFILE"
+end script
+
